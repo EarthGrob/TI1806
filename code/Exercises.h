@@ -7,24 +7,6 @@
 ////////////////// Exercise 1 ////////////////////////////////////
 std::pair<float, float> Statistics(const std::list<float>& values)
 {
-<<<<<<< HEAD
-	float sum = 0;
-	for (float i : values) {
-		sum += i;
-	}
-	float mean = sum / values.size();
-
-	float var = 0;
-	for (float i : values){
-		var += (i - mean)*(i - mean);
-	}
-
-	float temp = var / values.size();
-	float sd = sqrt(temp);
-
-
-	return std::pair<float, float>(mean, sd);
-=======
 	if (values.empty()) {
 		return std::pair<float, float>(0.f, 0.f);
 	}
