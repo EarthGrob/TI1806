@@ -1,0 +1,6 @@
+.idea
+.project
+code/.vs/
+code/Debug
+graphicsAssignments.iml
+code/Exercises.vcxproj
