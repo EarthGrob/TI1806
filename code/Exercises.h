@@ -23,7 +23,8 @@ std::pair<float, float> Statistics(const std::list<float>& values)
 		float temp = (i-avg);		//storing the current value minus the average
 		standerdDeviation += temp*temp; //adding the temporary value to standerdDeviation (it will become a sum of squares).
 	}
-	standerdDeviation = sqrt(standerdDeviation/size); //standerdDeviation will become the squareroot of standerdDeviatio
+	standerdDeviation = sqrt(standerdDeviation/size); //standerdDeviation will become the squareroot of standerdDeviation
+	return std::pair<float, float>(avg, standerdDeviation); //returning the average first, then the standerdDeviation.
 }
 //////////////////////////////////////////////////////////////////
 
