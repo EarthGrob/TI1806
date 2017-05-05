@@ -7,14 +7,52 @@
 ////////////////// Exercise 1 ////////////////////////////////////
 std::pair<float, float> Statistics(const std::list<float>& values)
 {
-	return std::pair<float, float>(0.f, 0.f);
+	float sum = 0;
+	for (float i : values) {
+		sum += i;
+	}
+	float mean = sum / values.size();
+
+	float var = 0;
+	for (float i : values){
+		var += (i - mean)*(i - mean);
+	}
+
+	float temp = var / values.size();
+	float sd = sqrt(temp);
+
+
+	return std::pair<float, float>(mean, sd);
 }
 //////////////////////////////////////////////////////////////////
 
 ////////////////// Exercise 2 ////////////////////////////////////
 class TreeVisitor {
 public:
-	float visitTree(const Tree& tree, bool countOnlyEvenLevels){ return 0.f; }
+	bool b = false;
+
+	float visitTree(const Tree& tree, bool countOnlyEvenLevels) {
+		float sum = 0.0;
+
+		if (b == false) {
+			b = countOnlyEvenLevels;
+		}
+		if (b) {
+			for (auto it = tree.children.begin(); it != tree.children.end(); it++) {
+				sum += visitTree(*it, !countOnlyEvenLevels);
+			}
+			if (countOnlyEvenLevels) {
+				sum += tree.value;
+			}
+			return sum;
+		}
+
+		for (auto it = tree.children.begin(); it != tree.children.end(); it++) {
+			sum += visitTree(*it, false);
+		}
+		sum += tree.value;
+		return sum;
+	}
 };
 //////////////////////////////////////////////////////////////////
 

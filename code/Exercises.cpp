@@ -14,6 +14,7 @@ public:
 ////////////////////////////// Exercise 2 
 float TreeTraversal(const Tree& t, TreeVisitor& visitor, bool countOnlyEvenLevels)
 {
+
 	return visitor.visitTree(t, countOnlyEvenLevels);
 }
 
