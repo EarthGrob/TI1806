@@ -5,3 +5,5 @@ code/Debug
 graphicsAssignments.iml
 code/Exercises.vcxproj
 code/Release
+.vs
+Exercises.sln

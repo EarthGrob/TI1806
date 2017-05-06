@@ -61,9 +61,31 @@ public:
 ////////////////// Exercise 3 ////////////////////////////////////
 class Complex {
 public:
-	Complex(float real, float imaginary){};
-
 	float real, im;
+
+	Complex(float rea, float imag){
+		real = rea;
+		im = imag;
+	};
+
+	Complex operator () (Complex& c1) {
+		return c1;
+	};
+};
+Complex operator + (Complex& c1, Complex& c2) {
+	return Complex(c1.real + c2.real, c1.im + c2.im);
+};
+
+Complex operator - (Complex& c1, Complex& c2) {
+	return Complex(c1.real - c2.real, c1.im - c2.im);
+};
+
+Complex operator * (Complex& c1, Complex& c2) {
+	float r1 = c1.real;
+	float i1 = c1.im;
+	float r2 = c2.real;
+	float i2 = c2.im;
+	return Complex(r1*r2 - i1*i2, r1*i2 + r2*i1);
 };
 //////////////////////////////////////////////////////////////////
 
