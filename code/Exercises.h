@@ -23,7 +23,7 @@ std::pair<float, float> Statistics(const std::list<float>& values)
 		float temp = (i-avg);		//storing the current value minus the average
 		standerdDeviation += temp*temp; //adding the temporary value to standerdDeviation (it will become a sum of squares).
 	}
-	standerdDeviation = sqrt(standerdDeviation/size); //standerdDeviation will become the squareroot of standerdDeviation
+	standerdDeviation = sqrt(standerdDeviation/size); //standerdDeviation will become the squareroot of standerdDeviation/size
 	return std::pair<float, float>(avg, standerdDeviation); //returning the average first, then the standerdDeviation.
 }
 //////////////////////////////////////////////////////////////////
@@ -90,9 +90,58 @@ Complex operator * (Complex& c1, Complex& c2) {
 //////////////////////////////////////////////////////////////////
 
 ////////////////// Exercise 4 ////////////////////////////////////
+int giveIndexOfHighest(std::list<float>& heights, int& from, int& to) {
+	int indexOfHighest = -1;
+	float highest = FLT_MIN;
+	int count = 0;
+	for (float f : heights) {
+		if (count >= from && count <= to) {
+			if (f >= highest) {
+				highest = f;
+				indexOfHighest = count;
+			}
+		}
+		count++;
+	}
+	return indexOfHighest;
+}
 float WaterLevels(std::list<float> heights)
 {
-	return 0;
+	if (heights.empty()) return 0;
+
+	int size = heights.size();				//storing the size for faster access
+	float* heightsArr = new float[size];	///////////////////////////////
+											//
+	int index = 0;							//	
+	for (float f : heights) {				//	}copy the list into an array
+		heightsArr[index] = f;				//
+		index++;							//
+	}										///////////////////////////////
+
+	float waterTotal = 0.f;		//set the water total to zero
+	int leftPtr = 0;			//set the left pointer to the first item of the array
+	int rightPtr = size - 1;	// and the right pointer to the last
+	float maxleft = 0.f;		//
+	float maxright = 0.f;
+	while (leftPtr <= rightPtr) {
+		if (heightsArr[leftPtr] <= heightsArr[rightPtr]) {
+			if (heightsArr[leftPtr] >= maxleft) {
+				maxleft = heightsArr[leftPtr];
+			} else {
+				waterTotal += maxleft - heightsArr[leftPtr];
+			}
+			leftPtr++;
+		} else {
+			if (heightsArr[rightPtr] >= maxright) {
+				maxright = heightsArr[rightPtr];
+			} else {
+				waterTotal += maxright - heightsArr[rightPtr];
+			}
+			rightPtr--;
+		}
+	}
+
+	return waterTotal;
 }
 //////////////////////////////////////////////////////////////////
 
