@@ -135,7 +135,7 @@ int main()
 	}
 	///////////////////////////////////////////////////////////
 
-	////////////////////////// Exercise 4
+	////////////////////////// Exercise 5
 	std::set<std::pair<location, location> > labyrinth;
 	labyrinth.insert(std::pair<location, location>(location(0, 0), location(1, 0)));
 	labyrinth.insert(std::pair<location, location>(location(0, 1), location(1, 1)));

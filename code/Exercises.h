@@ -3,6 +3,8 @@
 
 #include <list>
 #include <set>
+#include <queue>
+#include <map>
 
 ////////////////// Exercise 1 ////////////////////////////////////
 std::pair<float, float> Statistics(const std::list<float>& values)
@@ -104,7 +106,7 @@ int giveIndexOfHighest(std::list<float>& heights, int& from, int& to) {
 		count++;
 	}
 	return indexOfHighest;
-}
+};
 float WaterLevels(std::list<float> heights)
 {
 	if (heights.empty()) return 0;
@@ -142,16 +144,75 @@ float WaterLevels(std::list<float> heights)
 	}
 
 	return waterTotal;
-}
+};
 //////////////////////////////////////////////////////////////////
 
 ////////////////// Exercise 5 ////////////////////////////////////
 typedef std::pair<int, int> location;
 
+int breadthfirst(std::set<std::pair<location, location> > labyrinth, int size) {
+	std::set<location> known;					//what locations are already visited?
+	std::map<location, location> predecessors;  //from which location was this location found
+	std::queue<location> q;						//a queue with the 'colored' locations/vertices
+	location s = location(0, 0);				//the starting location
+	auto notFound = labyrinth.end();
+
+	q.push(s);			//we color s and
+	known.insert(s);    //visit s already
+
+	while (!q.empty()) {
+		location current = q.front();	//
+		q.pop();						//current = q.pop(); wasn't working
+
+		int x = current.first;	//storing the x and
+		int y = current.second;	// y of the current location
+
+		//visit(current);
+		if (x == size - 1 && y == size - 1) { // if the final location is reached
+			break;							// stop searching
+		}
+		//end visit(current);
+
+		//            up,do, le,ri
+		int xDir[] = { 0, 0, -1, 1 };
+		int yDir[] = { -1, 1, 0, 0 };
+		for (int i = 0; i < 4; i++) { //going in all directions around current
+			int newX = x + xDir[i];	//storing the x
+			int newY = y + yDir[i]; // and y of the new location
+			//looking if this new location is possible
+			bool inBounderies = (newX >= 0 && newX < size && newY >= 0 && newY < size);
+			location v = location(newX, newY);
+
+			//looking if this location can be accessed by the previous location (is there a wall in between?)
+			bool noWall = false;
+			if (i % 2 == 0) { //going up or left
+				noWall = labyrinth.find(std::pair<location, location>(v, current)) == notFound;
+			} else { //going down or right
+				noWall = labyrinth.find(std::pair<location, location>(current, v)) == notFound;
+			}
+
+			//if the location is possible, still unknown, and accessible from the previous(there is no wall in between)
+			if (inBounderies && known.find(v) == known.end() && noWall) {
+				q.push(v);					//then color it, to visit it later
+				known.insert(v);			//make it known
+				predecessors[v] = current;	//store its predecessor
+			}
+		}
+	}
+	
+	//predecessors now contains the shortest path from the end to the start.
+	location l = location(size - 1, size - 1);	//start at the end
+	int distance = 1;							//set the distance to 1
+	while (l.first != 0 || l.second != 0) { //while the beginning location is not reached
+		l = predecessors[l];				//go back one location
+		distance++;							//and add 1 to the distance
+	}
+	return distance;
+};
 int Labyrinth(std::set<std::pair<location, location> > labyrinth, int size)
 {
-	return 0;
-}
+	return breadthfirst(labyrinth, size);
+};
 //////////////////////////////////////////////////////////////////
 
 #endif
