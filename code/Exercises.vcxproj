@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<<<<<<< HEAD
 <Project DefaultTargets="Build" ToolsVersion="15.1" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-=======
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
->>>>>>> d0de53c7bc4f6bf64142e290a98d9fea071b087b
+
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
