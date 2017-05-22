@@ -121,11 +121,21 @@ Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lig
 //E.g., for a plane, the light source below the plane cannot cast light on the top, hence, there can also not be any specularity. 
 Vec3Df phongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, const Vec3Df & cameraPos, unsigned int index)
 {
-	float dot = Vec3Df::dotProduct(normal.unit(), lightPos - vertexPos);
-	Vec3Df R = 2 * normal.unit() * dot - ((lightPos - vertexPos).unit()); //reflection beam vector
-	float dot2 = Vec3Df::dotProduct(cameraPos, R);
-	if (dot2 < 0) dot2 = 0;
-	return Ks.at(index)*pow(dot2, Shininess.at(index));
+	Vec3Df L = lightPos - vertexPos;
+	float dot1 = Vec3Df::dotProduct(normal.unit(), L);
+
+	Vec3Df reflex = 2 * normal.unit() * dot1 - (L.unit());
+
+	float dot2 = Vec3Df::dotProduct(cameraPos, reflex);
+	if (dot2 < 0) {
+		dot2 = 0;
+	}
+
+	if (dot1 > 0) {
+		return Vec3Df(Ks.at(index)*pow(dot2, Shininess.at(index)));
+	}
+
+	return Vec3Df(0, 0, 0);
 }
 
 //Blinn-Phong Shading Specularity (http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model)
@@ -139,6 +149,10 @@ Vec3Df blinnPhongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const V
 	Vec3Df H = (L+V).unit();
 	float dot = Vec3Df::dotProduct(normal, H);
 	if (dot < 0) dot = 0;
+
+	if (Vec3Df::dotProduct(normal.unit(), L) < 0) { //testing right side
+		return Vec3Df(0, 0, 0);
+	}
 	return Ks.at(index) * pow(Vec3Df::dotProduct(normal, H), Shininess.at(index));
 }
 
