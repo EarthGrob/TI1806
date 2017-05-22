@@ -97,19 +97,21 @@ Vec3Df debugColor(unsigned int index)
 //standard lambertian shading: Kd * dot(N,L), clamped to zero when negative. Where L is the light vector
 //
 Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, unsigned int index)
-{	
-	//daRealFormula: I_D = dot(L,N)*C*I_L
-	//where I_D = intensity out
-	//		I_L = intensity in (index?)
-	//		L = normalized light-direction vector (lightPos?)
-	//		C = color vector (make it yourself? with RGB?)
-	//		N = normal (thank god there is one thing obvious)
-	Vec3Df color = Vec3Df(1, 1, 0); //yellow
-	//daFormula
-	float dot = Vec3Df::dotProduct(normal, lightPos);
-	if (dot < 0) { dot = 0; } //something with clamped to zero
-	return vertexPos*dot*color*index;
-	//return Vec3Df(1,1,0);
+{
+	//		L = normalized light-direction vector (lightPos - vertexPos)
+	//		Kd = color property vector (with RGB)
+	//		N = normal (thank god there is one thing obvious), vector orthogonal to curPoint/vertex in the surface
+	//daFormula: D = Id*Kd*cos(angle) (wikipedia)
+	//		Id = light property (RGB) we don't see this one :( we could add it though 3:P
+	//		Kd = surface property (RGB) of current vertex
+	//		cos(angle) = dot(L,N) (wikipedia) : substitution gives:
+	//		D = Id*Kd*dot(L,N) where dot is non-negative
+	Vec3Df L = lightPos - vertexPos; //vector pointing from light source to current vertex (point that is calculated)
+	float dot = Vec3Df::dotProduct(normal, L);
+	if (dot < 0) { dot = 0; } //something with clamped to zero (that's why things are black, comment it out for fun :) )
+	
+	//light color is omitted and thus white
+	return Kd.at(index)*dot;
 }
 
 
