@@ -5,5 +5,9 @@ code/Debug
 graphicsAssignments.iml
 code/Exercises.vcxproj
 code/Release
+week3-submap/Debug
+week3-submap/ipch
+week3-submap/week3/Debug
+
 .vs
 Exercises.sln
