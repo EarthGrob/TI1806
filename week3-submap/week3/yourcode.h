@@ -125,7 +125,7 @@ Vec3Df phongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df
 	Vec3Df R = 2 * normal.unit() * dot - ((lightPos - vertexPos).unit()); //reflection beam vector
 	float dot2 = Vec3Df::dotProduct(cameraPos, R);
 	if (dot2 < 0) dot2 = 0;
-	return Ks.at(index)*pow(dot2,Shininess.at(index));
+	return Ks.at(index)*pow(dot2, Shininess.at(index));
 }
 
 //Blinn-Phong Shading Specularity (http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model)
@@ -134,7 +134,12 @@ Vec3Df phongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df
 //The same test as before should be used
 Vec3Df blinnPhongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, const Vec3Df & cameraPos, unsigned int index)
 {
-	return Vec3Df(0,0,1);
+	Vec3Df L = lightPos - vertexPos;
+	Vec3Df V = cameraPos;
+	Vec3Df H = (L+V).unit();
+	float dot = Vec3Df::dotProduct(normal, H);
+	if (dot < 0) dot = 0;
+	return Ks.at(index) * pow(Vec3Df::dotProduct(normal, H), Shininess.at(index));
 }
 
 
