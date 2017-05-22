@@ -98,7 +98,18 @@ Vec3Df debugColor(unsigned int index)
 //
 Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, unsigned int index)
 {	
-	return Vec3Df(1,0,0);
+	//daRealFormula: I_D = dot(L,N)*C*I_L
+	//where I_D = intensity out
+	//		I_L = intensity in (index?)
+	//		L = normalized light-direction vector (lightPos?)
+	//		C = color vector (make it yourself? with RGB?)
+	//		N = normal (thank god there is one thing obvious)
+	Vec3Df color = Vec3Df(1, 1, 0); //yellow
+	//daFormula
+	float dot = Vec3Df::dotProduct(normal, lightPos);
+	if (dot < 0) { dot = 0; } //something with clamped to zero
+	return vertexPos*dot*color*index;
+	//return Vec3Df(1,1,0);
 }
 
 
