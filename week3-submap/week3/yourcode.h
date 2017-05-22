@@ -110,7 +110,9 @@ Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lig
 	float dot = Vec3Df::dotProduct(normal, L);
 	if (dot < 0) dot = 0; //something with clamped to zero (that's why things are black, comment it out for fun :) )
 	
-	//light color is omitted and thus white
+	if (Vec3Df::dotProduct(normal.unit(), L) < 0) { //testing right side
+		return Vec3Df(0, 0, 0);
+	}
 	return Kd.at(index)*dot;
 }
 
