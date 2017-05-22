@@ -108,7 +108,7 @@ Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lig
 	//		D = Id*Kd*dot(L,N) where dot is non-negative
 	Vec3Df L = lightPos - vertexPos; //vector pointing from light source to current vertex (point that is calculated)
 	float dot = Vec3Df::dotProduct(normal, L);
-	if (dot < 0) { dot = 0; } //something with clamped to zero (that's why things are black, comment it out for fun :) )
+	if (dot < 0) dot = 0; //something with clamped to zero (that's why things are black, comment it out for fun :) )
 	
 	//light color is omitted and thus white
 	return Kd.at(index)*dot;
@@ -121,7 +121,11 @@ Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lig
 //E.g., for a plane, the light source below the plane cannot cast light on the top, hence, there can also not be any specularity. 
 Vec3Df phongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, const Vec3Df & cameraPos, unsigned int index)
 {
-	return Vec3Df(0,1,0);
+	float dot = Vec3Df::dotProduct(normal.unit(), lightPos - vertexPos);
+	Vec3Df R = 2 * normal.unit() * dot - ((lightPos - vertexPos).unit()); //reflection beam vector
+	float dot2 = Vec3Df::dotProduct(cameraPos, R);
+	if (dot2 < 0) dot2 = 0;
+	return Ks.at(index)*pow(dot2,Shininess.at(index));
 }
 
 //Blinn-Phong Shading Specularity (http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model)
