@@ -17,7 +17,7 @@ std::vector<Vec3Df> Kd;//diffuse coefficient per vertex
 std::vector<Vec3Df> Ks;//specularity coefficient per vertex
 std::vector<float> Shininess;//exponent for phong and blinn-phong specularities
 int ToonDiscretize=4;//number of levels in toon shading
-float ToonSpecularThreshold=0.49;//threshold for specularity
+float ToonSpecularThreshold = 0.49f;//threshold for specularity
 
 //Mesh - will be filled and loaded outside.
 Mesh MyMesh;
@@ -45,10 +45,10 @@ void yourKeyboardFunction(unsigned char key)
 	switch(key)
 	{
 		case 't': 
-			ToonSpecularThreshold-=0.001;
+			ToonSpecularThreshold-=0.001f;
 		break;
 		case 'T': 
-			ToonSpecularThreshold+=0.001;
+			ToonSpecularThreshold+=0.001f;
 		break;
 		case 'd': 
 			ToonDiscretize-=1;
@@ -106,13 +106,11 @@ Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lig
 	//		Kd = surface property (RGB) of current vertex
 	//		cos(angle) = dot(L,N) (wikipedia) : substitution gives:
 	//		D = Id*Kd*dot(L,N) where dot is non-negative
-	Vec3Df L = lightPos - vertexPos; //vector pointing from light source to current vertex (point that is calculated)
+	Vec3Df L = (lightPos - vertexPos).unit(); //vector pointing from light source to current vertex (point that is calculated)
 	float dot = Vec3Df::dotProduct(normal, L);
+
 	if (dot < 0) dot = 0; //something with clamped to zero (that's why things are black, comment it out for fun :) )
-	
-	if (Vec3Df::dotProduct(normal.unit(), L) < 0) { //testing right side
-		return Vec3Df(0, 0, 0);
-	}
+
 	return Kd.at(index)*dot;
 }
 
@@ -123,21 +121,23 @@ Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lig
 //E.g., for a plane, the light source below the plane cannot cast light on the top, hence, there can also not be any specularity. 
 Vec3Df phongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, const Vec3Df & cameraPos, unsigned int index)
 {
-	Vec3Df L = lightPos - vertexPos;
-	float dot1 = Vec3Df::dotProduct(normal.unit(), L);
+	Vec3Df L = (lightPos - vertexPos).unit();
+	Vec3Df N = normal.unit();
 
-	Vec3Df reflex = 2 * normal.unit() * dot1 - (L.unit());
+	Vec3Df R = (2 * N * Vec3Df::dotProduct(N, L) - L).unit();
 
-	float dot2 = Vec3Df::dotProduct(cameraPos, reflex);
-	if (dot2 < 0) {
-		dot2 = 0;
+	Vec3Df V = cameraPos;
+	V.normalize();
+
+
+	//if the angle between lightposition and surface normal
+	// is more than 90 degrees
+	if (Vec3Df::dotProduct(L, N) < 0) { //( cosine(angleBetweenTwoUnitVectors) === dotProduct(theTwoUnitVectors) )
+		//then things should be unlit/black/ zero vector/RGB(0,0,0)
+		return Vec3Df(0, 0, 0);
 	}
-
-	if (dot1 > 0) {
-		return Vec3Df(Ks.at(index)*pow(dot2, Shininess.at(index)));
-	}
-
-	return Vec3Df(0, 0, 0);
+	//Ks*pow(dot(V,R),shininess) (copied from above)
+	return Ks.at(index)*pow(Vec3Df::dotProduct(V, R), Shininess.at(0));
 }
 
 //Blinn-Phong Shading Specularity (http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model)
@@ -176,7 +176,7 @@ Vec3Df toonShadingNoSpecular(const Vec3Df & vertexPos, Vec3Df & normal, const Ve
 	if (f < 0) f = 0;
 	// interval
 	float n = floorf(f * ToonDiscretize);
-	float interval = 1.0 / ToonDiscretize;
+	float interval = 1.0f / ToonDiscretize;
 	f = interval * n + (interval * 0.5f);
 	return Kd[index] * f;
 }
