@@ -164,7 +164,7 @@ Vec3Df blinnPhongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const V
 		return Vec3Df(0, 0, 0);
 	}
 
-
+	//formulae
 	return Ks[index] * pow(Vec3Df::dotProduct(normal, H), Shininess.at(index));
 }
 
@@ -192,11 +192,16 @@ Vec3Df toonShadingNoSpecular(const Vec3Df & vertexPos, Vec3Df & normal, const Ve
 		dot = 0;
 	}
 
-	//Discretize all uniform intervals
+	//Discretize all uniform intervals with 4
 	float d = floorf(dot * ToonDiscretize);
 
+
 	float interval = 1.0f / ToonDiscretize;
+
+	//step shown in instructions: (c(i)+c(i+1))/2
 	dot = interval * d + (interval * 0.5f);
+
+
 	return Kd[index] * dot;
 }
 
@@ -260,11 +265,18 @@ Vec3Df userInteractionShadow(const Vec3Df & selectedPos, const Vec3Df & selected
 	//there are several ways to do this, choose one you deem appropriate given the current light position
 	//no panic, I will not judge what solution you chose, as long as the above condition is met.
 	// calculate difference
-	Vec3Df v = lightPos - selectedPos;
-	float scalar = Vec3Df::dotProduct(v, selectedNormal);
-	Vec3Df proj = lightPos - scalar * selectedNormal;
 
-	return proj;	
+
+	//vector pointing from light source to current vertex (point that is calculated)
+	Vec3Df L = lightPos - selectedPos;
+
+	//dotproduct of L and the Normal
+	float dot = Vec3Df::dotProduct(L, selectedNormal);
+
+	//calculate the new light position which is orthogonal to the normal at that location. 
+	Vec3Df result = lightPos - dot * selectedNormal;
+
+	return result;	
 }
 
 Vec3Df userInteractionSpecular(const Vec3Df & selectedPos, const Vec3Df & selectedNormal, const Vec3Df & lightPos, const Vec3Df & cameraPos)
