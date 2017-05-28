@@ -227,12 +227,17 @@ Vec3Df toonShadingOnlySpecular(const Vec3Df & vertexPos, Vec3Df & normal, const 
 	//halfway vector
 	Vec3Df H = (cameraPos - (lightPos - vertexPos)).unit();
 
+	//dot product halfway vector and the normal
 	float channel = Vec3Df::dotProduct(H, normal.unit());
 
+
+	// if it is smaller than specularity return 1, else to 0. 
 	if (channel > ToonSpecularThreshold)
 		channel = 1;
 	else
 		channel = 0;
+
+
 	return Ks[index] * channel;
 }
 
@@ -246,16 +251,23 @@ Vec3Df userInteractionSphere(const Vec3Df & selectedPos, const Vec3Df & camPos)
 	//selectedPos is a location on the mesh. Use this location to place the light source to cover the location as seen from camPos.
 	//Further, the light should be at a distance of 1.5 from the origin of the scene - in other words, located on a sphere of radius 1.5 around the origin.
 	
+	//radius of 1.5
 	float r = 1.5;
-	Vec3Df directionV = (selectedPos - camPos).unit();
 
-	float a = sqrt(pow(Vec3Df::dotProduct(directionV, camPos), 2) - camPos.getSquaredLength() + r*r);
-	float b = -(Vec3Df::dotProduct(directionV, camPos));
-	float d1 = b + a;
-	float d2 = b - a;
+	//Getting tha D
+	Vec3Df D = (selectedPos - camPos).unit();
+
+	//Formulae
+	float dot = sqrt(pow(Vec3Df::dotProduct(D, camPos), 2) - camPos.getSquaredLength() + r*r);
+	float b = -(Vec3Df::dotProduct(D, camPos));
+
+	//calculative stuff
+	float d1 = b + dot;
+	float d2 = b - dot;
+
 
 	float distance = (d1 > d2) ? d2 : d1;
-	return (camPos + (directionV * distance));
+	return (camPos + (D * distance));
 }
 
 Vec3Df userInteractionShadow(const Vec3Df & selectedPos, const Vec3Df & selectedNormal, const Vec3Df & lightPos)
@@ -285,9 +297,9 @@ Vec3Df userInteractionSpecular(const Vec3Df & selectedPos, const Vec3Df & select
 	//please ensure also that the light is at a distance of 1 from selectedpos! If the camera is on the wrong side of the surface (normal pointing the other way),
 	//then just return the original light position.
 	//There is only ONE way of doing this!
-	Vec3Df n = selectedNormal;
-	Vec3Df d = -1 * selectedPos;
-	Vec3Df r = d - 2 * Vec3Df::dotProduct(d, n) * n;
-	r.normalize();
-	return r;
+	Vec3Df N = selectedNormal;
+	Vec3Df S = -1 * selectedPos;
+	Vec3Df dot = S - 2 * Vec3Df::dotProduct(S, N) * N;
+	dot.normalize();
+	return dot;
 }
