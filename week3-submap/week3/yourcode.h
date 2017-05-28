@@ -121,6 +121,7 @@ Vec3Df diffuseOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lig
 //E.g., for a plane, the light source below the plane cannot cast light on the top, hence, there can also not be any specularity. 
 Vec3Df phongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, const Vec3Df & cameraPos, unsigned int index)
 {
+	//vector pointing from light source to current vertex (point that is calculated)
 	Vec3Df L = (lightPos - vertexPos).unit();
 	Vec3Df N = normal.unit();
 
@@ -146,16 +147,25 @@ Vec3Df phongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df
 //The same test as before should be used
 Vec3Df blinnPhongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, const Vec3Df & cameraPos, unsigned int index)
 {
-	Vec3Df L = lightPos - vertexPos;
-	Vec3Df V = cameraPos;
-	Vec3Df H = (L+V).unit();
-	float dot = Vec3Df::dotProduct(normal, H);
-	if (dot < 0) dot = 0;
+	// Halfway vector
+	Vec3Df H = ((lightPos - vertexPos)+ cameraPos).unit();
 
-	if (Vec3Df::dotProduct(normal.unit(), L) < 0) { //testing right side
+	//dot product of Normal and halfway vector
+	float dot = Vec3Df::dotProduct(normal, H);
+
+	// for showing black
+	if (dot < 0) {
+		dot = 0;
+	}
+
+
+	// if negative, return 0 for black
+	if (Vec3Df::dotProduct(normal.unit(), (lightPos - vertexPos)) < 0) { 
 		return Vec3Df(0, 0, 0);
 	}
-	return Ks.at(index) * pow(Vec3Df::dotProduct(normal, H), Shininess.at(index));
+
+
+	return Ks[index] * pow(Vec3Df::dotProduct(normal, H), Shininess.at(index));
 }
 
 
@@ -171,14 +181,23 @@ Vec3Df blinnPhongSpecularOnly(const Vec3Df & vertexPos, Vec3Df & normal, const V
 //For v=Kd, return (c(N)+c(N+1))/2, else 0.
 Vec3Df toonShadingNoSpecular(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, unsigned int index)
 {
-	float f = Vec3Df::dotProduct(normal, (lightPos - vertexPos).unit());
-	// normalise
-	if (f < 0) f = 0;
-	// interval
-	float n = floorf(f * ToonDiscretize);
+	//vector pointing from light source to current vertex (point that is calculated)
+	Vec3Df L = (lightPos - vertexPos).unit();
+
+	//Normal dot producted with L
+	float dot = Vec3Df::dotProduct(normal, L);
+
+	//for black
+	if (dot < 0) {
+		dot = 0;
+	}
+
+	//Discretize all uniform intervals
+	float d = floorf(dot * ToonDiscretize);
+
 	float interval = 1.0f / ToonDiscretize;
-	f = interval * n + (interval * 0.5f);
-	return Kd[index] * f;
+	dot = interval * d + (interval * 0.5f);
+	return Kd[index] * dot;
 }
 
 //Toon shading specularity
@@ -186,23 +205,30 @@ Vec3Df toonShadingNoSpecular(const Vec3Df & vertexPos, Vec3Df & normal, const Ve
 //If a channel of Blinn-Phong Specularity has a value bigger or equal to ToonSpecularThreshold, then set it to 1, else to 0.
 Vec3Df toonShadingOnlySpecular(const Vec3Df & vertexPos, Vec3Df & normal, const Vec3Df & lightPos, const Vec3Df & cameraPos, unsigned int index)
 {
-	//normalized light direction vector
-	Vec3Df nld = (lightPos - vertexPos).unit();
-	//make sure normal is unit vector just in case..
-	Vec3Df nn = normal.unit();
-	float nnDotNld = Vec3Df::dotProduct(nld, nn);
-	//check whether or not the light is on the right side of the surface.
-	if (nnDotNld < 0) {
+	//vector pointing from light source to current vertex (point that is calculated)
+	Vec3Df L = (lightPos - vertexPos).unit();
+
+	//normal 
+	Vec3Df N = normal.unit();
+
+	//dot product of L and N
+	float dot = Vec3Df::dotProduct(L, N);
+
+	// Black making stuff
+	if (dot < 0) {
 		return Vec3Df(0, 0, 0);
 	}
-	Vec3Df h = (cameraPos - (lightPos - vertexPos)).unit();
-	float dot = Vec3Df::dotProduct(h, normal.unit());
 
-	if (dot > ToonSpecularThreshold)
-		dot = 1;
+	//halfway vector
+	Vec3Df H = (cameraPos - (lightPos - vertexPos)).unit();
+
+	float channel = Vec3Df::dotProduct(H, normal.unit());
+
+	if (channel > ToonSpecularThreshold)
+		channel = 1;
 	else
-		dot = 0;
-	return Ks[index] * dot;
+		channel = 0;
+	return Ks[index] * channel;
 }
 
 
@@ -235,11 +261,7 @@ Vec3Df userInteractionShadow(const Vec3Df & selectedPos, const Vec3Df & selected
 	//no panic, I will not judge what solution you chose, as long as the above condition is met.
 	// calculate difference
 	Vec3Df v = lightPos - selectedPos;
-	// calculate scalar of the normal
 	float scalar = Vec3Df::dotProduct(v, selectedNormal);
-	// subtract scalar times normal from the lightpos
-	// to obtain a point projected on the plane orthogonal
-	// to the scalar
 	Vec3Df proj = lightPos - scalar * selectedNormal;
 
 	return proj;	
